@@ -1,6 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
+// using System.Linq;  <-- RIMOSSO: Non usiamo più questa libreria
 
 namespace GestioneFlotta
 {
@@ -10,7 +10,7 @@ namespace GestioneFlotta
         {
             List<Veicolo> flotta = new List<Veicolo>();
 
-            // Dati di prova opzionali
+            // Dati di prova
             flotta.Add(new Auto("TEST_01", "Fiat Panda", 15000, 850, 4));
 
             bool esci = false;
@@ -18,7 +18,7 @@ namespace GestioneFlotta
             while (!esci)
             {
                 Console.Clear();
-                Console.WriteLine("=== GESTIONE FLOTTA (Namespace: GestioneFlotta) ===");
+                Console.WriteLine("=== GESTIONE FLOTTA (NO LINQ) ===");
                 Console.WriteLine("1. Inserisci nuovo veicolo");
                 Console.WriteLine("2. Visualizza report flotta");
                 Console.WriteLine("0. Esci");
@@ -39,7 +39,6 @@ namespace GestioneFlotta
                         Console.WriteLine("Chiusura in corso...");
                         break;
                     default:
-                        // Anche qui possiamo mettere il rosso per scelta menu errata
                         Console.ForegroundColor = ConsoleColor.Red;
                         Console.WriteLine("Opzione non valida. Premi invio.");
                         Console.ResetColor();
@@ -70,7 +69,6 @@ namespace GestioneFlotta
 
                 bool tipoValido = false;
 
-                // Ciclo finché non viene scelto un tipo valido (A o C)
                 while (!tipoValido)
                 {
                     Console.WriteLine("\nTipo veicolo: [A] Auto | [C] Camion");
@@ -83,10 +81,9 @@ namespace GestioneFlotta
                         int posti = int.Parse(Console.ReadLine());
                         listaVeicoli.Add(new Auto(targa, marca, km, litri, posti));
 
-                        Console.ForegroundColor = ConsoleColor.Green; // Verde per successo
+                        Console.ForegroundColor = ConsoleColor.Green;
                         Console.WriteLine("--> Auto aggiunta con successo!");
                         Console.ResetColor();
-
                         tipoValido = true;
                     }
                     else if (tipo == "C")
@@ -95,24 +92,21 @@ namespace GestioneFlotta
                         double carico = double.Parse(Console.ReadLine());
                         listaVeicoli.Add(new Camion(targa, marca, km, litri, carico));
 
-                        Console.ForegroundColor = ConsoleColor.Green; // Verde per successo
+                        Console.ForegroundColor = ConsoleColor.Green;
                         Console.WriteLine("--> Camion aggiunto con successo!");
                         Console.ResetColor();
-
                         tipoValido = true;
                     }
                     else
                     {
-                        // --- ERRORE ROSSO: TIPO SBAGLIATO ---
                         Console.ForegroundColor = ConsoleColor.Red;
                         Console.WriteLine("ERRORE: Devi inserire 'A' oppure 'C'. Riprova.");
-                        Console.ResetColor(); // Importante: rimettiamo il colore normale
+                        Console.ResetColor();
                     }
                 }
             }
             catch (FormatException)
             {
-                // --- ERRORE ROSSO: FORMATO NUMERICO SBAGLIATO ---
                 Console.ForegroundColor = ConsoleColor.Red;
                 Console.WriteLine("\nERRORE GRAVE: Hai inserito del testo in un campo numerico.");
                 Console.WriteLine("L'inserimento è stato annullato.");
@@ -123,6 +117,7 @@ namespace GestioneFlotta
             Console.ReadLine();
         }
 
+        // --- QUI C'È LA MODIFICA PRINCIPALE ---
         static void VisualizzaFlotta(List<Veicolo> listaVeicoli)
         {
             Console.Clear();
@@ -134,15 +129,23 @@ namespace GestioneFlotta
             }
             else
             {
+                // 1. Inizializziamo l'accumulatore a zero prima del ciclo
+                double sommaKm = 0;
+
                 foreach (Veicolo v in listaVeicoli)
                 {
+                    // Stampa dettagli
                     Console.WriteLine(v.GetDettagliCompleti());
                     Console.WriteLine($"   -> Consumo: {v.CalcolaKmPerLitro():F2} km/l");
                     Console.WriteLine("- - - - - - - - - - - - - - - - - - - -");
+
+                    // 2. Aggiungiamo i km del veicolo corrente al totale
+                    // (Sostituisce la funzione .Sum() di LINQ)
+                    sommaKm = sommaKm + v.KmPercorsi;
                 }
 
-                double kmTotali = listaVeicoli.Sum(x => x.KmPercorsi);
-                Console.WriteLine($"\nTotale Km percorsi dalla flotta: {kmTotali:N0}");
+                // 3. Stampiamo il risultato finale
+                Console.WriteLine($"\nTotale Km percorsi dalla flotta: {sommaKm:N0}");
             }
 
             Console.WriteLine("\nPremi invio per tornare al menu...");
