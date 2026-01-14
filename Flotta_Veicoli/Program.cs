@@ -1,6 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq; // Necessario per usare .Sum()
+using System.Linq;
 
 namespace GestioneFlotta
 {
@@ -39,7 +39,10 @@ namespace GestioneFlotta
                         Console.WriteLine("Chiusura in corso...");
                         break;
                     default:
+                        // Anche qui possiamo mettere il rosso per scelta menu errata
+                        Console.ForegroundColor = ConsoleColor.Red;
                         Console.WriteLine("Opzione non valida. Premi invio.");
+                        Console.ResetColor();
                         Console.ReadLine();
                         break;
                 }
@@ -79,7 +82,11 @@ namespace GestioneFlotta
                         Console.Write("Numero Posti: ");
                         int posti = int.Parse(Console.ReadLine());
                         listaVeicoli.Add(new Auto(targa, marca, km, litri, posti));
-                        Console.WriteLine("--> Auto aggiunta!");
+
+                        Console.ForegroundColor = ConsoleColor.Green; // Verde per successo
+                        Console.WriteLine("--> Auto aggiunta con successo!");
+                        Console.ResetColor();
+
                         tipoValido = true;
                     }
                     else if (tipo == "C")
@@ -87,20 +94,29 @@ namespace GestioneFlotta
                         Console.Write("Capacità Carico (t): ");
                         double carico = double.Parse(Console.ReadLine());
                         listaVeicoli.Add(new Camion(targa, marca, km, litri, carico));
-                        Console.WriteLine("--> Camion aggiunto!");
+
+                        Console.ForegroundColor = ConsoleColor.Green; // Verde per successo
+                        Console.WriteLine("--> Camion aggiunto con successo!");
+                        Console.ResetColor();
+
                         tipoValido = true;
                     }
                     else
                     {
+                        // --- ERRORE ROSSO: TIPO SBAGLIATO ---
+                        Console.ForegroundColor = ConsoleColor.Red;
                         Console.WriteLine("ERRORE: Devi inserire 'A' oppure 'C'. Riprova.");
-                        // Il ciclo while ripartirà qui, senza perdere i dati di targa/marca/km
+                        Console.ResetColor(); // Importante: rimettiamo il colore normale
                     }
                 }
             }
             catch (FormatException)
             {
+                // --- ERRORE ROSSO: FORMATO NUMERICO SBAGLIATO ---
+                Console.ForegroundColor = ConsoleColor.Red;
                 Console.WriteLine("\nERRORE GRAVE: Hai inserito del testo in un campo numerico.");
                 Console.WriteLine("L'inserimento è stato annullato.");
+                Console.ResetColor();
             }
 
             Console.WriteLine("\nPremi invio per tornare al menu...");
@@ -120,13 +136,11 @@ namespace GestioneFlotta
             {
                 foreach (Veicolo v in listaVeicoli)
                 {
-                    // Qui viene chiamato il metodo specifico (Polimorfismo + Override)
                     Console.WriteLine(v.GetDettagliCompleti());
                     Console.WriteLine($"   -> Consumo: {v.CalcolaKmPerLitro():F2} km/l");
                     Console.WriteLine("- - - - - - - - - - - - - - - - - - - -");
                 }
 
-                // Statistiche globali con LINQ
                 double kmTotali = listaVeicoli.Sum(x => x.KmPercorsi);
                 Console.WriteLine($"\nTotale Km percorsi dalla flotta: {kmTotali:N0}");
             }
