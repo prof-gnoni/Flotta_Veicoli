@@ -6,15 +6,15 @@ namespace GestioneFlotta
     {
         public double CapacitaCaricoTonnellate { get; set; }
 
-        public Camion(string targa, string marca, double km, double litri, double carico)
-            : base(targa, marca, km, litri)
+        // Aggiunto parametro 'int cavalli'
+        public Camion(string targa, string marca, double km, double litri, int cavalli, double carico)
+            : base(targa, marca, km, litri, cavalli)
         {
             CapacitaCaricoTonnellate = carico;
         }
 
         public override string GetDettagliCompleti()
         {
-            // Chiama la base e aggiunge il carico
             return base.GetDettagliCompleti() + $" | Carico: {CapacitaCaricoTonnellate}t";
         }
     }

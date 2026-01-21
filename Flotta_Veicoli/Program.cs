@@ -1,6 +1,5 @@
 ﻿using System;
-using System.Collections.Generic;
-// using System.Linq;  <-- RIMOSSO: Non usiamo più questa libreria
+using System.Collections.Generic; // Serve per passare i dati in una lista temporanea per il sort
 
 namespace GestioneFlotta
 {
@@ -8,19 +7,25 @@ namespace GestioneFlotta
     {
         static void Main(string[] args)
         {
-            List<Veicolo> flotta = new List<Veicolo>();
+            // CAMBIAMENTO 1: Usiamo la KeyedCollection personalizzata
+            FlottaCollection flotta = new FlottaCollection();
 
-            // Dati di prova
-            flotta.Add(new Auto("TEST_01", "Fiat Panda", 15000, 850, 4));
+            // Dati di prova (Aggiornati con i cavalli)
+            // Targa (chiave) viene gestita automaticamente dalla collezione
+            flotta.Add(new Auto("TEST_01", "Fiat Panda", 15000, 850, 69, 4));
+            flotta.Add(new Camion("TEST_02", "Iveco Daily", 50000, 4000, 180, 3.5));
+            flotta.Add(new Auto("TEST_03", "Ferrari Roma", 5000, 1200, 620, 2));
 
             bool esci = false;
 
             while (!esci)
             {
                 Console.Clear();
-                Console.WriteLine("=== GESTIONE FLOTTA (NO LINQ) ===");
+                Console.WriteLine("=== GESTIONE FLOTTA (KeyedCollection + Comparable) ===");
                 Console.WriteLine("1. Inserisci nuovo veicolo");
-                Console.WriteLine("2. Visualizza report flotta");
+                Console.WriteLine("2. Visualizza report flotta (Ordinata per inserimento)");
+                Console.WriteLine("3. Visualizza report flotta (Ordinata per POTENZA)"); // NUOVA OPZIONE
+                Console.WriteLine("4. Cerca Veicolo per Targa"); // NUOVA OPZIONE (dimostra la potenza della KeyedCollection)
                 Console.WriteLine("0. Esci");
                 Console.Write("\nScegli un'opzione: ");
 
@@ -32,31 +37,42 @@ namespace GestioneFlotta
                         InserisciVeicolo(flotta);
                         break;
                     case "2":
-                        VisualizzaFlotta(flotta);
+                        // Passiamo false per non ordinare
+                        VisualizzaFlotta(flotta, false);
+                        break;
+                    case "3":
+                        // Passiamo true per ordinare usando IComparable
+                        VisualizzaFlotta(flotta, true);
+                        break;
+                    case "4":
+                        CercaVeicolo(flotta);
                         break;
                     case "0":
                         esci = true;
-                        Console.WriteLine("Chiusura in corso...");
                         break;
                     default:
-                        Console.ForegroundColor = ConsoleColor.Red;
-                        Console.WriteLine("Opzione non valida. Premi invio.");
-                        Console.ResetColor();
-                        Console.ReadLine();
                         break;
                 }
             }
         }
 
-        static void InserisciVeicolo(List<Veicolo> listaVeicoli)
+        static void InserisciVeicolo(FlottaCollection collezione)
         {
             Console.Clear();
             Console.WriteLine("--- NUOVO INSERIMENTO ---");
 
             try
             {
-                Console.Write("Inserisci Targa: ");
-                string targa = Console.ReadLine();
+                Console.Write("Inserisci Targa (Univoca): ");
+                string targa = Console.ReadLine().ToUpper();
+
+                // Controllo preventivo: KeyedCollection contiene già la chiave?
+                if (collezione.Contains(targa))
+                {
+                    Console.WriteLine("ERRORE: Targa già presente in archivio!");
+                    Console.ReadLine();
+                    return;
+                }
 
                 Console.Write("Inserisci Marca: ");
                 string marca = Console.ReadLine();
@@ -67,88 +83,88 @@ namespace GestioneFlotta
                 Console.Write("Inserisci Litri consumati: ");
                 double litri = double.Parse(Console.ReadLine());
 
-                bool tipoValido = false;
+                Console.Write("Inserisci Cavalli (CV): ");
+                int cavalli = int.Parse(Console.ReadLine());
 
-                while (!tipoValido)
+                Console.WriteLine("\nTipo veicolo: [A] Auto | [C] Camion");
+                string tipo = Console.ReadLine().ToUpper();
+
+                if (tipo == "A")
                 {
-                    Console.WriteLine("\nTipo veicolo: [A] Auto | [C] Camion");
-                    Console.Write("Scelta: ");
-                    string tipo = Console.ReadLine().ToUpper();
-
-                    if (tipo == "A")
-                    {
-                        Console.Write("Numero Posti: ");
-                        int posti = int.Parse(Console.ReadLine());
-                        listaVeicoli.Add(new Auto(targa, marca, km, litri, posti));
-
-                        Console.ForegroundColor = ConsoleColor.Green;
-                        Console.WriteLine("--> Auto aggiunta con successo!");
-                        Console.ResetColor();
-                        tipoValido = true;
-                    }
-                    else if (tipo == "C")
-                    {
-                        Console.Write("Capacità Carico (t): ");
-                        double carico = double.Parse(Console.ReadLine());
-                        listaVeicoli.Add(new Camion(targa, marca, km, litri, carico));
-
-                        Console.ForegroundColor = ConsoleColor.Green;
-                        Console.WriteLine("--> Camion aggiunto con successo!");
-                        Console.ResetColor();
-                        tipoValido = true;
-                    }
-                    else
-                    {
-                        Console.ForegroundColor = ConsoleColor.Red;
-                        Console.WriteLine("ERRORE: Devi inserire 'A' oppure 'C'. Riprova.");
-                        Console.ResetColor();
-                    }
+                    Console.Write("Numero Posti: ");
+                    int posti = int.Parse(Console.ReadLine());
+                    // .Add() della KeyedCollection estrarrà la targa automaticamente
+                    collezione.Add(new Auto(targa, marca, km, litri, cavalli, posti));
+                }
+                else if (tipo == "C")
+                {
+                    Console.Write("Capacità Carico (t): ");
+                    double carico = double.Parse(Console.ReadLine());
+                    collezione.Add(new Camion(targa, marca, km, litri, cavalli, carico));
                 }
             }
-            catch (FormatException)
+            catch (Exception ex)
             {
-                Console.ForegroundColor = ConsoleColor.Red;
-                Console.WriteLine("\nERRORE GRAVE: Hai inserito del testo in un campo numerico.");
-                Console.WriteLine("L'inserimento è stato annullato.");
-                Console.ResetColor();
+                Console.WriteLine($"Errore: {ex.Message}");
+                Console.ReadLine();
+            }
+        }
+
+        static void VisualizzaFlotta(FlottaCollection collezione, bool ordinaPerPotenza)
+        {
+            Console.Clear();
+            string titolo = ordinaPerPotenza ? "REPORT ORDINATO PER POTENZA (CV)" : "REPORT STANDARD (INSERIMENTO)";
+            Console.WriteLine($"=== {titolo} ===");
+
+            if (collezione.Count == 0)
+            {
+                Console.WriteLine("Nessun veicolo.");
+                Console.ReadLine();
+                return;
             }
 
-            Console.WriteLine("\nPremi invio per tornare al menu...");
+            // PER ORDINARE UNA KEYEDCOLLECTION:
+            // La KeyedCollection non ha un metodo Sort nativo perché mantiene l'ordine di inserimento.
+            // Per ordinare, copiamo i riferimenti in una List<Veicolo> temporanea.
+            List<Veicolo> listaTemp = new List<Veicolo>(collezione);
+
+            if (ordinaPerPotenza)
+            {
+                // Qui viene chiamato automaticamente il metodo CompareTo definito in Veicolo
+                listaTemp.Sort();
+                Console.WriteLine("(Ordinamento effettuato tramite IComparable su proprietà 'Cavalli')\n");
+            }
+
+            foreach (Veicolo v in listaTemp)
+            {
+                Console.WriteLine(v.GetDettagliCompleti());
+            }
+
+            Console.WriteLine("\nPremi invio...");
             Console.ReadLine();
         }
 
-        // --- QUI C'È LA MODIFICA PRINCIPALE ---
-        static void VisualizzaFlotta(List<Veicolo> listaVeicoli)
+        // Metodo extra per dimostrare l'utilità della KeyedCollection
+        static void CercaVeicolo(FlottaCollection collezione)
         {
             Console.Clear();
-            Console.WriteLine("=== REPORT FLOTTA COMPLETO ===");
+            Console.Write("Inserisci targa da cercare: ");
+            string targa = Console.ReadLine().ToUpper();
 
-            if (listaVeicoli.Count == 0)
+            // KeyedCollection permette accesso diretto con le parentesi quadre usando la chiave (stringa)
+            // invece dell'indice numerico
+            if (collezione.Contains(targa))
             {
-                Console.WriteLine("Nessun veicolo in elenco.");
+                Veicolo trovato = collezione[targa]; // Accesso diretto O(1)
+                Console.ForegroundColor = ConsoleColor.Cyan;
+                Console.WriteLine("\nVEICOLO TROVATO:");
+                Console.WriteLine(trovato.GetDettagliCompleti());
+                Console.ResetColor();
             }
             else
             {
-                // 1. Inizializziamo l'accumulatore a zero prima del ciclo
-                double sommaKm = 0;
-
-                foreach (Veicolo v in listaVeicoli)
-                {
-                    // Stampa dettagli
-                    Console.WriteLine(v.GetDettagliCompleti());
-                    Console.WriteLine($"   -> Consumo: {v.CalcolaKmPerLitro():F2} km/l");
-                    Console.WriteLine("- - - - - - - - - - - - - - - - - - - -");
-
-                    // 2. Aggiungiamo i km del veicolo corrente al totale
-                    // (Sostituisce la funzione .Sum() di LINQ)
-                    sommaKm = sommaKm + v.KmPercorsi;
-                }
-
-                // 3. Stampiamo il risultato finale
-                Console.WriteLine($"\nTotale Km percorsi dalla flotta: {sommaKm:N0}");
+                Console.WriteLine("Veicolo non trovato.");
             }
-
-            Console.WriteLine("\nPremi invio per tornare al menu...");
             Console.ReadLine();
         }
     }
