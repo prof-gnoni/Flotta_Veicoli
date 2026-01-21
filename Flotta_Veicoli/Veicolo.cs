@@ -31,7 +31,7 @@ namespace GestioneFlotta
         public virtual string GetDettagliCompleti()
         {
             // Aggiungo i cavalli alla stringa base
-            return $"Targa: {Targa.PadRight(8)} | Marca: {Marca.PadRight(15)} | CV: {Cavalli.ToString().PadRight(4)} | Km: {KmPercorsi:N0}";
+            return $"Targa: {Targa,-8} | Marca: {Marca,-15} | CV: {Cavalli.ToString(),-4} | Km: {KmPercorsi,8:N0}";
         }
 
         // IMPLEMENTAZIONE DI ICOMPARABLE
@@ -41,7 +41,15 @@ namespace GestioneFlotta
             if (other == null) return 1;
 
             // Confronto basato sui Cavalli (dal più piccolo al più grande)
-            return this.Cavalli.CompareTo(other.Cavalli);
+            //return this.Cavalli.CompareTo(other.Cavalli);
+
+            if(this.Cavalli < other.Cavalli)
+                return -1;
+            else if(this.Cavalli > other.Cavalli)
+                return 1;
+            else
+                return 0;
+
 
             // Se volessi ordinare per Km, userei:
             // return this.KmPercorsi.CompareTo(other.KmPercorsi);

@@ -12,7 +12,7 @@ namespace GestioneFlotta
 
             // Dati di prova (Aggiornati con i cavalli)
             // Targa (chiave) viene gestita automaticamente dalla collezione
-            flotta.Add(new Auto("TEST_01", "Fiat Panda", 15000, 850, 69, 4));
+            flotta.Add(new Auto("TEST_01", "Fiat Panda", 15000, 850, 300, 4));
             flotta.Add(new Camion("TEST_02", "Iveco Daily", 50000, 4000, 180, 3.5));
             flotta.Add(new Auto("TEST_03", "Ferrari Roma", 5000, 1200, 620, 2));
 
